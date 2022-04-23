@@ -10,7 +10,7 @@ contract Lottery {
 
     constructor(address _priceFeedAddress, uint256 _usdEntranceFee) {
         ethToUsdPriceFeed = AggregatorV3Interface(_priceFeedAddress);
-        usdEntranceFee = _usdEntranceFee * 10 ** 18; // $ * (wei/eth)
+        usdEntranceFee = _usdEntranceFee * 10 ** 26; // usd * (wei / eth) * 10**8
     }
 
     function enter() public payable {
@@ -18,9 +18,8 @@ contract Lottery {
     }
 
     function getEntranceFee() public view returns (uint256) {
-        (,int256 exchangeRate,,,) = ethToUsdPriceFeed.latestRoundData();
-        uint256 adjustedExchangeRate = uint256(exchangeRate) * 10 ** 10; // eth/$ 18 decimals
-        uint256 entranceFee = usdEntranceFee / adjustedExchangeRate;
+        (,int256 exchangeRate,,,) = ethToUsdPriceFeed.latestRoundData(); // (usd / eth) * 10**8
+        uint256 entranceFee = usdEntranceFee / uint256(exchangeRate);
         return entranceFee;
     }
 
