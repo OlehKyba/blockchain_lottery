@@ -4,3 +4,12 @@ compiler:
   solc:
     remappings:
       - '@chainlink=smartcontractkit/chainlink-brownie-contracts@0.4.0'
+networks:
+  default: development
+  dev_networks:
+    - development
+  development:
+    is_publish_source: False
+
+lottery:
+  usd_entrance_fee: 50
