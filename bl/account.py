@@ -12,4 +12,3 @@ def get_main_account() -> "Account":
 
 def get_secondary_account() -> "Account":
     return accounts[1]
-

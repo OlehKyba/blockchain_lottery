@@ -76,12 +76,14 @@ def test_enter_should_raise_err_when_lottery_not_started(
     secondary_account: "Account",
 ) -> None:
     with pytest.raises(VirtualMachineError) as err_info:
-        lottery.enter({
-            "from": secondary_account,
-            "value": web3.toWei(0.02, 'ether'),
-        })
+        lottery.enter(
+            {
+                "from": secondary_account,
+                "value": web3.toWei(0.02, "ether"),
+            }
+        )
 
-    assert err_info.match('Lottery state must be OPEN!')
+    assert err_info.match("Lottery state must be OPEN!")
 
 
 def test_enter_should_raise_err_when_lottery_not_in_start_state(
@@ -92,12 +94,14 @@ def test_enter_should_raise_err_when_lottery_not_in_start_state(
     lottery.startLottery({"from": main_account})
 
     with pytest.raises(VirtualMachineError) as err_info:
-        lottery.enter({
-            "from": secondary_account,
-            "value": web3.toWei(0.018, 'ether'),
-        })
+        lottery.enter(
+            {
+                "from": secondary_account,
+                "value": web3.toWei(0.018, "ether"),
+            }
+        )
 
-    assert err_info.match('Not enough ETH!')
+    assert err_info.match("Not enough ETH!")
 
 
 def test_enter_should_success(
@@ -107,10 +111,12 @@ def test_enter_should_success(
 ) -> None:
     lottery.startLottery({"from": main_account})
 
-    lottery.enter({
-        "from": secondary_account,
-        "value": web3.toWei(0.02, 'ether'),
-    })
+    lottery.enter(
+        {
+            "from": secondary_account,
+            "value": web3.toWei(0.02, "ether"),
+        }
+    )
 
     assert secondary_account.address == lottery.players(0)
 
@@ -122,7 +128,7 @@ def test_start_lottery_should_raise_err_when_not_owner_request(
     with pytest.raises(VirtualMachineError) as exe_info:
         lottery.startLottery({"from": secondary_account})
 
-    assert exe_info.match('Ownable: caller is not the owner')
+    assert exe_info.match("Ownable: caller is not the owner")
 
 
 def test_start_lottery_should_raise_err_when_not_close_state(
@@ -135,7 +141,7 @@ def test_start_lottery_should_raise_err_when_not_close_state(
     with pytest.raises(VirtualMachineError) as exe_info:
         lottery.startLottery({"from": main_account})
 
-    assert exe_info.match('Lottery state must be CLOSED!')
+    assert exe_info.match("Lottery state must be CLOSED!")
 
 
 def test_start_lottery_should_success(
@@ -154,7 +160,7 @@ def test_end_lottery_should_raise_err_when_not_owner_request(
     with pytest.raises(VirtualMachineError) as exe_info:
         lottery.endLottery({"from": secondary_account})
 
-    assert exe_info.match('Ownable: caller is not the owner')
+    assert exe_info.match("Ownable: caller is not the owner")
 
 
 def test_end_lottery_should_raise_err_when_not_open_state(
@@ -164,7 +170,7 @@ def test_end_lottery_should_raise_err_when_not_open_state(
     with pytest.raises(VirtualMachineError) as exe_info:
         lottery.endLottery({"from": main_account})
 
-    assert exe_info.match('Lottery state must be OPEN!')
+    assert exe_info.match("Lottery state must be OPEN!")
 
 
 def test_end_lottery_should_success(
