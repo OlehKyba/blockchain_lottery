@@ -2,8 +2,9 @@
 pragma solidity ^0.8.0;
 
 import { AggregatorV3Interface } from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 
-contract Lottery {
+contract Lottery is Ownable {
     enum LOTTERY_STATE {
         OPEN,
         CLOSED,
@@ -35,9 +36,8 @@ contract Lottery {
         return entranceFee;
     }
 
-    function startLottery() public {
+    function startLottery() public onlyOwner {
         require(state == LOTTERY_STATE.CLOSED, "Lottery state must be CLOSED!");
-
         state = LOTTERY_STATE.OPEN;
     }
 

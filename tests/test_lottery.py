@@ -1,4 +1,5 @@
 import typing as t
+from enum import Enum
 
 import pytest
 from brownie import network, web3
@@ -16,6 +17,12 @@ if t.TYPE_CHECKING:
 DECIMALS: t.Final[int] = 8
 INITIAL_VALUE: t.Final[int] = 259829000000  # 2598,29 usd
 USD_ENTRANCE_FEE: t.Final[int] = 50
+
+
+class LotteryStates(Enum):
+    START = 0
+    CLOSED = 1
+    CALCULATING = 2
 
 
 @pytest.fixture(scope="session")
@@ -106,3 +113,35 @@ def test_enter_should_success(
     })
 
     assert secondary_account.address == lottery.players(0)
+
+
+def test_start_lottery_should_raise_err_when_not_owner_request(
+    lottery: "ProjectContract",
+    secondary_account: "Account",
+) -> None:
+    with pytest.raises(VirtualMachineError) as exe_info:
+        lottery.startLottery({"from": secondary_account})
+
+    assert exe_info.match('Ownable: caller is not the owner')
+
+
+def test_start_lottery_should_raise_err_when_not_close_state(
+    lottery: "ProjectContract",
+    main_account: "Account",
+) -> None:
+    # set state in START!
+    lottery.startLottery({"from": main_account})
+
+    with pytest.raises(VirtualMachineError) as exe_info:
+        lottery.startLottery({"from": main_account})
+
+    assert exe_info.match('Lottery state must be CLOSED!')
+
+
+def test_start_lottery_should_success(
+    lottery: "ProjectContract",
+    main_account: "Account",
+) -> None:
+    lottery.startLottery({"from": main_account})
+
+    assert LotteryStates(lottery.state()) == LotteryStates.START
