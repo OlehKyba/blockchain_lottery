@@ -8,3 +8,8 @@ if t.TYPE_CHECKING:
 
 def get_main_account() -> "Account":
     return accounts[0]
+
+
+def get_secondary_account() -> "Account":
+    return accounts[1]
+

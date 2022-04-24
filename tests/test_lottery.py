@@ -2,8 +2,9 @@ import typing as t
 
 import pytest
 from brownie import network, web3
+from brownie.exceptions import VirtualMachineError
 
-from bl.account import get_main_account
+from bl.account import get_main_account, get_secondary_account
 from bl.config_utils import get_dev_networks, get_price_feed_address
 from bl.contracts import Lottery
 from bl.deploy import deploy_lottery, deploy_price_feed_mock
@@ -25,6 +26,11 @@ def dev_networks() -> set[str]:
 @pytest.fixture(scope="session")
 def main_account() -> "Account":
     return get_main_account()
+
+
+@pytest.fixture(scope="session")
+def secondary_account() -> "Account":
+    return get_secondary_account()
 
 
 @pytest.fixture(scope="session")
@@ -56,3 +62,47 @@ def test_get_entrance_fee(lottery: "ProjectContract") -> None:
 
     assert entrance_fee > web3.toWei(0.01923, "ether")
     assert entrance_fee < web3.toWei(0.01925, "ether")
+
+
+def test_enter_should_raise_err_when_lottery_not_started(
+    lottery: "ProjectContract",
+    secondary_account: "Account",
+) -> None:
+    with pytest.raises(VirtualMachineError) as err_info:
+        lottery.enter({
+            "from": secondary_account,
+            "value": web3.toWei(0.02, 'ether'),
+        })
+
+    assert err_info.match('Lottery state must be OPEN!')
+
+
+def test_enter_should_raise_err_when_lottery_not_in_start_state(
+    lottery: "ProjectContract",
+    main_account: "Account",
+    secondary_account: "Account",
+) -> None:
+    lottery.startLottery({"from": main_account})
+
+    with pytest.raises(VirtualMachineError) as err_info:
+        lottery.enter({
+            "from": secondary_account,
+            "value": web3.toWei(0.018, 'ether'),
+        })
+
+    assert err_info.match('Not enough ETH!')
+
+
+def test_enter_should_success(
+    lottery: "ProjectContract",
+    main_account: "Account",
+    secondary_account: "Account",
+) -> None:
+    lottery.startLottery({"from": main_account})
+
+    lottery.enter({
+        "from": secondary_account,
+        "value": web3.toWei(0.02, 'ether'),
+    })
+
+    assert secondary_account.address == lottery.players(0)

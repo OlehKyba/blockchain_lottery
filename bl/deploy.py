@@ -49,9 +49,6 @@ def deploy_lottery(
     if is_publish_source is None:
         is_publish_source = get_is_publish_source(active_network)
 
-    if price_feed_address is None:
-        price_feed_address = get_price_feed_address(active_network)
-
     if usd_entrance_fee is None:
         usd_entrance_fee = get_usd_entrance_fee(USD_ENTRANCE_FEE)
 
@@ -72,6 +69,9 @@ def deploy_lottery(
         )
         price_feed = deploy_price_feed_mock(account)
         price_feed_address = price_feed.address
+
+    elif not price_feed_address:
+        price_feed_address = get_price_feed_address(active_network)
 
     lottery = Lottery.deploy(
         price_feed_address,
