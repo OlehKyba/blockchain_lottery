@@ -145,3 +145,34 @@ def test_start_lottery_should_success(
     lottery.startLottery({"from": main_account})
 
     assert LotteryStates(lottery.state()) == LotteryStates.START
+
+
+def test_end_lottery_should_raise_err_when_not_owner_request(
+    lottery: "ProjectContract",
+    secondary_account: "Account",
+) -> None:
+    with pytest.raises(VirtualMachineError) as exe_info:
+        lottery.endLottery({"from": secondary_account})
+
+    assert exe_info.match('Ownable: caller is not the owner')
+
+
+def test_end_lottery_should_raise_err_when_not_open_state(
+    lottery: "ProjectContract",
+    main_account: "Account",
+) -> None:
+    with pytest.raises(VirtualMachineError) as exe_info:
+        lottery.endLottery({"from": main_account})
+
+    assert exe_info.match('Lottery state must be OPEN!')
+
+
+def test_end_lottery_should_success(
+    lottery: "ProjectContract",
+    main_account: "Account",
+) -> None:
+    lottery.startLottery({"from": main_account})
+
+    lottery.endLottery({"from": main_account})
+
+    assert LotteryStates(lottery.state()) == LotteryStates.CALCULATING

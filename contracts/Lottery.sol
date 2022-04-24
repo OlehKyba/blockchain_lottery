@@ -41,7 +41,8 @@ contract Lottery is Ownable {
         state = LOTTERY_STATE.OPEN;
     }
 
-    function endLottery() public {
-
+    function endLottery() public onlyOwner {
+        require(state == LOTTERY_STATE.OPEN, "Lottery state must be OPEN!");
+        state = LOTTERY_STATE.CALCULATING;
     }
 }
